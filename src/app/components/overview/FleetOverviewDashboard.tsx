@@ -624,9 +624,6 @@ export function FleetOverviewDashboard() {
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <PageTitle className="!mb-0">{overviewCopy.pageTitle}</PageTitle>
-          <TinyText muted className="!mt-1 !block max-w-2xl leading-relaxed">
-            {overviewCopy.pageSubtitle}
-          </TinyText>
           <TinyText muted className="!mt-1 !block">
             {overviewCopy.lastUpdated}
           </TinyText>

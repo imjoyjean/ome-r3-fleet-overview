@@ -47,8 +47,6 @@ export type OverviewWidget = {
 
 export const overviewCopy = {
   pageTitle: "Overview",
-  pageSubtitle:
-    "Fleet health, active rollouts, and exceptions · details live in Observability and Fleet rollout",
   lastUpdated: "Updated 2 minutes ago",
   attentionTitle: "Needs your action",
   fleetRollouts: "Fleet rollouts",
