@@ -8,6 +8,10 @@ import {
   type WizardEntryMode,
 } from '../components/deployments/DeploymentWizard';
 import { deploymentCopy } from '../components/deployments/deploymentPrototypeCopy';
+import {
+  isFleetRolloutListPopulated,
+  setFleetRolloutListPopulated,
+} from '../components/deployments/fleetRolloutListSession';
 import { getWizardPresetForTab } from '../components/deployments/deploymentTabPresets';
 import { ActivityStreamScreen } from '../components/deployments/ActivityStreamScreen';
 import type { OpenDeploymentWizardOptions } from '../components/deployments/CreateDeploymentSplitButton';
@@ -23,7 +27,14 @@ type FleetPlanFromClustersState = {
 export function DeploymentsPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [hasDeployments, setHasDeployments] = useState(false);
+  const [hasDeployments, setHasDeployments] = useState(
+    isFleetRolloutListPopulated,
+  );
+
+  const markListPopulated = () => {
+    setFleetRolloutListPopulated(true);
+    setHasDeployments(true);
+  };
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [wizardSessionId, setWizardSessionId] = useState(0);
   const [wizardEntryMode, setWizardEntryMode] =
@@ -99,7 +110,7 @@ export function DeploymentsPage() {
     setWizardInitialClusterNames(undefined);
     setWizardInitialActionId(undefined);
     setWizardLaunchTab('all');
-    setHasDeployments(true);
+    markListPopulated();
     if (wizardFormData) {
       setExecutionPolicy({
         runAs: wizardFormData.runAs,
@@ -117,7 +128,7 @@ export function DeploymentsPage() {
   };
 
   const handleFastForwardToDeployments = () => {
-    setHasDeployments(true);
+    markListPopulated();
   };
 
   return (

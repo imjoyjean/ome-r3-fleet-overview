@@ -14,6 +14,7 @@ import {
   CompactCard,
 } from "../../imports/UIComponents";
 import { deploymentCopy } from "../components/deployments/deploymentPrototypeCopy";
+import { setFleetRolloutListPopulated } from "../components/deployments/fleetRolloutListSession";
 import { getFleetRolloutDetail } from "../components/deployments/fleetRolloutDemoData";
 import type { FleetRolloutDetail } from "../components/deployments/fleetRolloutDemoData";
 import { FleetRolloutCompletedDetail } from "../components/deployments/FleetRolloutCompletedDetail";
@@ -46,6 +47,12 @@ export function DeploymentDrilldownPage() {
   const detail = deploymentId
     ? getFleetRolloutDetail(deploymentId)
     : undefined;
+
+  useEffect(() => {
+    if (detail) {
+      setFleetRolloutListPopulated(true);
+    }
+  }, [detail]);
 
   if (!detail) {
     return (
