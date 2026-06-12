@@ -55,7 +55,7 @@ export const overviewCopy = {
   morningAfterHint: "Morning-after confidence check",
   activeRollouts: "Active rollouts",
   fleetHealth: "Platform health",
-  recommendations: "Suggested next steps",
+  recommendations: "Recommendations",
   yourView: "Your view",
   yourViewDescription:
     "Personalize this view by pinning saved searches and shortcuts from other pages.",

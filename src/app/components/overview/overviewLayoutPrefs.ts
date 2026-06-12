@@ -50,7 +50,7 @@ export const OVERVIEW_SECTION_META: Record<
     description: "Last completed rollout and in-progress changes",
   },
   recommendations: {
-    label: "Suggested next steps",
+    label: "Recommendations",
     description: "Detected upgrades and configuration drift",
   },
   "pinned-insights": {
