@@ -11,7 +11,7 @@ This repo is a snapshot from the Red Hat `hybrid-platforms` monorepo (`fleet-rol
 
 After GitHub Pages deploys from `main`:
 
-**https://imjoyjean.github.io/ome-fleet-overview-r3/**
+**https://imjoyjean.github.io/ome-r3-fleet-overview/**
 
 Key routes:
 
@@ -40,7 +40,7 @@ npm run preview
 For GitHub Pages locally, match CI base path:
 
 ```bash
-GITHUB_PAGES_BASE=/ome-fleet-overview-r3/ npm run build
+GITHUB_PAGES_BASE=/ome-r3-fleet-overview/ npm run build
 ```
 
 ## Moving back to Hybrid Platforms hub
