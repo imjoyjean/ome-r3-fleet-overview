@@ -63,7 +63,170 @@ export const overviewCopy = {
   rolloutsShowing: (shown: number, total: number) => `Showing ${shown} of ${total}`,
   showAll: (n: number) => `Show all (${n})`,
   showLess: "Show less",
+  viewInObservability: "View in observability",
+  openObservability: "Open observability",
+  viewClusters: "View clusters",
 };
+
+/** R1 optional widgets — summary snapshots with link-out to Observability / fleet tools */
+export type FleetCapacityRow = {
+  id: string;
+  label: string;
+  value: string;
+  percent: number;
+  hot?: boolean;
+  detail: string;
+  href: string;
+};
+
+export type VersionDistributionRow = {
+  version: string;
+  count: number;
+  behind?: boolean;
+};
+
+export type FleetHealthGroup = {
+  id: string;
+  name: string;
+  clusterCount: number;
+  summary: string;
+  healthLabel: string;
+  status: "healthy" | "warning" | "critical";
+  href: string;
+};
+
+export type ActiveIncident = {
+  id: string;
+  title: string;
+  badge: string;
+  severity: "warning" | "info";
+  tags?: string[];
+  href: string;
+};
+
+export type SloErrorBudget = {
+  id: string;
+  remainingPercent: number;
+  pipeline: string;
+};
+
+export type MttrTrendPoint = {
+  month: string;
+  minutes: number;
+};
+
+export const FLEET_CAPACITY_ROWS: FleetCapacityRow[] = [
+  {
+    id: "cpu",
+    label: "CPU utilization (fleet avg)",
+    value: "72%",
+    percent: 72,
+    detail: "8 clusters above 85%",
+    href: "/observability",
+  },
+  {
+    id: "memory",
+    label: "Memory utilization (fleet avg)",
+    value: "68%",
+    percent: 68,
+    detail: "3 clusters above 90%",
+    href: "/observability",
+  },
+  {
+    id: "storage",
+    label: "Storage pressure",
+    value: "54%",
+    percent: 54,
+    detail: "2 clusters near quota",
+    href: "/observability",
+  },
+  {
+    id: "hot-clusters",
+    label: "Clusters under pressure",
+    value: "8",
+    percent: 20,
+    hot: true,
+    detail: "prod-eu-02, prod-us-04, staging-ap-01…",
+    href: "/observability",
+  },
+];
+
+export const VERSION_DISTRIBUTION: VersionDistributionRow[] = [
+  { version: "OCP 4.16.2 (target)", count: 35 },
+  { version: "OCP 4.16.1", count: 3, behind: true },
+  { version: "OCP 4.15.8", count: 2, behind: true },
+];
+
+export const FLEET_HEALTH_BY_GROUP: FleetHealthGroup[] = [
+  {
+    id: "prod",
+    name: "Production",
+    clusterCount: 18,
+    summary: "1 rollout blocked · 2 degraded",
+    healthLabel: "Needs attention",
+    status: "warning",
+    href: "/clusters",
+  },
+  {
+    id: "staging",
+    name: "Staging",
+    clusterCount: 12,
+    summary: "All operators available",
+    healthLabel: "Healthy",
+    status: "healthy",
+    href: "/clusters",
+  },
+  {
+    id: "dev",
+    name: "Development",
+    clusterCount: 10,
+    summary: "3 clusters behind target version",
+    healthLabel: "Upgrade pending",
+    status: "warning",
+    href: "/clusters",
+  },
+];
+
+export const ACTIVE_INCIDENTS: ActiveIncident[] = [
+  {
+    id: "INC-1042",
+    title: "Elevated API latency on prod-eu-02",
+    badge: "Warning",
+    severity: "warning",
+    tags: ["prod-eu-02", "apiserver"],
+    href: "/observability",
+  },
+  {
+    id: "INC-1038",
+    title: "Ingress certificate renewal pending",
+    badge: "Info",
+    severity: "info",
+    tags: ["prod-ap-01"],
+    href: "/observability",
+  },
+];
+
+export const SLO_ERROR_BUDGETS: SloErrorBudget[] = [
+  {
+    id: "slo-api",
+    remainingPercent: 82,
+    pipeline: "API availability · 99.9% SLO",
+  },
+  {
+    id: "slo-ingress",
+    remainingPercent: 64,
+    pipeline: "Ingress success rate · prod fleet",
+  },
+];
+
+export const MTTR_TREND: MttrTrendPoint[] = [
+  { month: "Jan", minutes: 48 },
+  { month: "Feb", minutes: 42 },
+  { month: "Mar", minutes: 38 },
+  { month: "Apr", minutes: 35 },
+  { month: "May", minutes: 31 },
+  { month: "Jun", minutes: 28 },
+];
 
 export function summarizeRolloutProgress(activity: FleetRolloutActivity): string {
   if (activity.progressType === "simple" && activity.simpleProgress) {

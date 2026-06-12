@@ -22,6 +22,7 @@ import { deploymentCopy } from "../deployments/deploymentPrototypeCopy";
 import { runChannelLabel } from "../deployments/fleetRolloutDemoData";
 import {
   ATTENTION_ITEMS,
+  ACTIVE_INCIDENTS,
   DETECTED_RECOMMENDATIONS,
   FLEET_HEALTH_SIGNALS,
   FLEET_SUMMARY_STATS,
@@ -37,6 +38,14 @@ import {
   type FleetHealthSignal,
 } from "./fleetOverviewDemoData";
 import { OverviewAddWidgetsBanner } from "./OverviewAddWidgetsBanner";
+import {
+  ActiveIncidentsWidgetPanel,
+  FleetCapacityWidgetPanel,
+  FleetHealthByGroupWidgetPanel,
+  MttrWidgetPanel,
+  SloErrorBudgetsWidgetPanel,
+  VersionDistributionWidgetPanel,
+} from "./OverviewOptionalWidgetPanels";
 import {
   OverviewLayoutToolbar,
   OverviewWidgetFrame,
@@ -397,23 +406,63 @@ export function FleetOverviewDashboard() {
         return (
           <Badge variant="default">{DETECTED_RECOMMENDATIONS.length}</Badge>
         );
+      case "active-incidents":
+        return <Badge variant="warning">{ACTIVE_INCIDENTS.length}</Badge>;
       default:
         return null;
     }
   };
 
   const overviewSectionHeaderAction = (sectionId: OverviewSectionId) => {
-    if (sectionId !== "fleet-rollouts") return null;
-
-    return (
-      <Link
-        to={deploymentCopy.fleetRollout.basePath}
-        className="text-sm font-medium hover:underline"
-        style={{ color: "var(--primary)" }}
-      >
-        {overviewCopy.viewAllRolloutsCount(allActiveRollouts.length)}
-      </Link>
-    );
+    switch (sectionId) {
+      case "fleet-rollouts":
+        return (
+          <Link
+            to={deploymentCopy.fleetRollout.basePath}
+            className="text-sm font-medium hover:underline"
+            style={{ color: "var(--primary)" }}
+          >
+            {overviewCopy.viewAllRolloutsCount(allActiveRollouts.length)}
+          </Link>
+        );
+      case "capacity-chart":
+      case "slo-error-budgets":
+      case "mttr-trend":
+      case "active-incidents":
+        return (
+          <Link
+            to="/observability"
+            className="text-sm font-medium hover:underline"
+            style={{ color: "var(--primary)" }}
+          >
+            {sectionId === "active-incidents"
+              ? overviewCopy.openObservability
+              : overviewCopy.viewInObservability}
+          </Link>
+        );
+      case "version-distribution":
+        return (
+          <Link
+            to="/fleetrollout"
+            className="text-sm font-medium hover:underline"
+            style={{ color: "var(--primary)" }}
+          >
+            Plan upgrade rollout
+          </Link>
+        );
+      case "health-by-group":
+        return (
+          <Link
+            to="/clusters"
+            className="text-sm font-medium hover:underline"
+            style={{ color: "var(--primary)" }}
+          >
+            {overviewCopy.viewClusters}
+          </Link>
+        );
+      default:
+        return null;
+    }
   };
 
   const renderOverviewSection = (sectionId: OverviewSectionId) => {
@@ -577,6 +626,18 @@ export function FleetOverviewDashboard() {
         );
       case "pinned-insights":
         return <YourViewCards layout={layout} onLayoutChange={setLayout} />;
+      case "capacity-chart":
+        return <FleetCapacityWidgetPanel />;
+      case "version-distribution":
+        return <VersionDistributionWidgetPanel />;
+      case "health-by-group":
+        return <FleetHealthByGroupWidgetPanel />;
+      case "active-incidents":
+        return <ActiveIncidentsWidgetPanel />;
+      case "slo-error-budgets":
+        return <SloErrorBudgetsWidgetPanel />;
+      case "mttr-trend":
+        return <MttrWidgetPanel />;
       default:
         return null;
     }

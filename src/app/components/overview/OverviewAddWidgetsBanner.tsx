@@ -1,10 +1,16 @@
 import {
   AlertTriangle,
+  BarChart3,
   Bookmark,
   GitBranch,
   LayoutGrid,
+  Layers,
   Lightbulb,
   ListChecks,
+  PieChart,
+  Siren,
+  TrendingDown,
+  Users,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -24,6 +30,12 @@ const OVERVIEW_SECTION_ICONS: Record<OverviewSectionId, LucideIcon> = {
   "fleet-rollouts": GitBranch,
   recommendations: Lightbulb,
   "pinned-insights": Bookmark,
+  "capacity-chart": BarChart3,
+  "version-distribution": Layers,
+  "health-by-group": Users,
+  "active-incidents": Siren,
+  "slo-error-budgets": PieChart,
+  "mttr-trend": TrendingDown,
 };
 
 function AddWidgetPaletteCard({

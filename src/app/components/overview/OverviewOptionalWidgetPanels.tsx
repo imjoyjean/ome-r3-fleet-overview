@@ -6,6 +6,7 @@ import {
   FLEET_CAPACITY_ROWS,
   FLEET_HEALTH_BY_GROUP,
   MTTR_TREND,
+  overviewCopy,
   SLO_ERROR_BUDGETS,
   VERSION_DISTRIBUTION,
 } from "./fleetOverviewDemoData";
@@ -52,38 +53,50 @@ function DonutRing({
 
 export function FleetCapacityWidgetPanel() {
   return (
-    <div className="grid gap-3 p-4 sm:grid-cols-2">
-      {FLEET_CAPACITY_ROWS.map((row) => (
-        <Link
-          key={row.id}
-          to={row.href}
-          className="rounded-md border px-3 py-3 transition-colors hover:bg-muted/30"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <TinyText style={{ fontWeight: "var(--font-weight-medium)" }}>
-              {row.label}
-            </TinyText>
-            <Badge variant={row.hot ? "warning" : "default"}>{row.value}</Badge>
-          </div>
-          <div
-            className="h-2 overflow-hidden rounded-full"
-            style={{ backgroundColor: "var(--muted)" }}
+    <>
+      <div className="grid gap-3 p-4 sm:grid-cols-2">
+        {FLEET_CAPACITY_ROWS.map((row) => (
+          <Link
+            key={row.id}
+            to={row.href}
+            className="rounded-md border px-3 py-3 transition-colors hover:bg-muted/30"
+            style={{ borderColor: "var(--border)" }}
           >
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <TinyText style={{ fontWeight: "var(--font-weight-medium)" }}>
+                {row.label}
+              </TinyText>
+              <Badge variant={row.hot ? "warning" : "default"}>{row.value}</Badge>
+            </div>
             <div
-              className="h-full rounded-full"
-              style={{
-                width: `${row.percent}%`,
-                backgroundColor: row.hot ? "var(--chart-4)" : "var(--primary)",
-              }}
-            />
-          </div>
-          <TinyText muted className="!mt-1.5 !block">
-            {row.detail}
-          </TinyText>
+              className="h-2 overflow-hidden rounded-full"
+              style={{ backgroundColor: "var(--muted)" }}
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${row.percent}%`,
+                  backgroundColor: row.hot ? "var(--chart-4)" : "var(--primary)",
+                }}
+              />
+            </div>
+            <TinyText muted className="!mt-1.5 !block">
+              {row.detail}
+            </TinyText>
+          </Link>
+        ))}
+      </div>
+      <div className="px-4 pb-4">
+        <Link
+          to="/observability"
+          className="inline-flex items-center gap-0.5 text-sm font-medium hover:underline"
+          style={{ color: "var(--primary)" }}
+        >
+          {overviewCopy.viewInObservability}
+          <ChevronRight className="size-3.5" aria-hidden />
         </Link>
-      ))}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -214,28 +227,40 @@ export function ActiveIncidentsWidgetPanel() {
 
 export function SloErrorBudgetsWidgetPanel() {
   return (
-    <div className="grid gap-4 p-4 sm:grid-cols-2">
-      {SLO_ERROR_BUDGETS.map((slo) => (
-        <div
-          key={slo.id}
-          className="flex items-center gap-4 rounded-md border px-3 py-3"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <DonutRing percent={slo.remainingPercent} color="#3E8635" />
-          <div className="min-w-0">
-            <SmallText
-              className="!mb-0.5 !block"
-              style={{ fontWeight: "var(--font-weight-medium)" }}
-            >
-              {slo.remainingPercent}% remaining
-            </SmallText>
-            <TinyText muted className="!block leading-snug">
-              {slo.pipeline}
-            </TinyText>
+    <>
+      <div className="grid gap-4 p-4 sm:grid-cols-2">
+        {SLO_ERROR_BUDGETS.map((slo) => (
+          <div
+            key={slo.id}
+            className="flex items-center gap-4 rounded-md border px-3 py-3"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <DonutRing percent={slo.remainingPercent} color="#3E8635" />
+            <div className="min-w-0">
+              <SmallText
+                className="!mb-0.5 !block"
+                style={{ fontWeight: "var(--font-weight-medium)" }}
+              >
+                {slo.remainingPercent}% remaining
+              </SmallText>
+              <TinyText muted className="!block leading-snug">
+                {slo.pipeline}
+              </TinyText>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      <div className="px-4 pb-4">
+        <Link
+          to="/observability"
+          className="inline-flex items-center gap-0.5 text-sm font-medium hover:underline"
+          style={{ color: "var(--primary)" }}
+        >
+          {overviewCopy.viewInObservability}
+          <ChevronRight className="size-3.5" aria-hidden />
+        </Link>
+      </div>
+    </>
   );
 }
 

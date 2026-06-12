@@ -6,7 +6,13 @@ export type OverviewSectionId =
   | "attention"
   | "fleet-rollouts"
   | "recommendations"
-  | "pinned-insights";
+  | "pinned-insights"
+  | "capacity-chart"
+  | "version-distribution"
+  | "health-by-group"
+  | "active-incidents"
+  | "slo-error-budgets"
+  | "mttr-trend";
 
 export type OverviewWidgetHeight = "default" | "minimized" | "maximized";
 
@@ -51,22 +57,53 @@ export const OVERVIEW_SECTION_META: Record<
     label: "Your view",
     description: "Pin saved searches and shortcuts to personalize this view",
   },
+  "capacity-chart": {
+    label: "Capacity utilization",
+    description: "Fleet CPU, memory, and storage pressure summary",
+  },
+  "version-distribution": {
+    label: "Version distribution",
+    description: "OpenShift version spread across the fleet",
+  },
+  "health-by-group": {
+    label: "Health by group",
+    description: "Cluster health rolled up by fleet group or environment",
+  },
+  "active-incidents": {
+    label: "Active incidents",
+    description: "Open incidents and alerts needing triage",
+  },
+  "slo-error-budgets": {
+    label: "SLO error budgets",
+    description: "Remaining error budget by pipeline (Observability)",
+  },
+  "mttr-trend": {
+    label: "MTTR trend",
+    description: "Mean time to recovery over the last 6 months",
+  },
 };
 
 const SECTION_IDS = Object.keys(OVERVIEW_SECTION_META) as OverviewSectionId[];
 
+/** Default landing: KPI strip, attention, rollouts, recommendations. R1 optional widgets hidden in Add widgets library. */
 export const DEFAULT_OVERVIEW_LAYOUT: OverviewLayoutPrefs = {
   sections: [
-    { id: "getting-started", visible: true },
     { id: "fleet-summary", visible: true },
     { id: "attention", visible: true },
     { id: "fleet-rollouts", visible: true },
     { id: "recommendations", visible: true },
-    { id: "pinned-insights", visible: true },
+    { id: "getting-started", visible: false },
+    { id: "pinned-insights", visible: false },
+    { id: "capacity-chart", visible: false },
+    { id: "version-distribution", visible: false },
+    { id: "health-by-group", visible: false },
+    { id: "active-incidents", visible: false },
+    { id: "slo-error-budgets", visible: false },
+    { id: "mttr-trend", visible: false },
   ],
 };
 
-const STORAGE_KEY = "ome-overview-layout-v1";
+const STORAGE_KEY = "ome-overview-layout-v2";
 
 function normalizeSection(entry: OverviewSectionLayout): OverviewSectionLayout {
   return {
@@ -147,7 +184,9 @@ export function reorderYourViewCards(
 export function loadOverviewLayout(): OverviewLayoutPrefs {
   if (typeof window === "undefined") return DEFAULT_OVERVIEW_LAYOUT;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw =
+      window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem("ome-overview-layout-v1");
     if (!raw) return DEFAULT_OVERVIEW_LAYOUT;
     return mergeWithDefaults(JSON.parse(raw));
   } catch {
@@ -163,6 +202,7 @@ export function saveOverviewLayout(prefs: OverviewLayoutPrefs): void {
 export function resetOverviewLayout(): OverviewLayoutPrefs {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem("ome-overview-layout-v1");
   }
   return DEFAULT_OVERVIEW_LAYOUT;
 }
@@ -302,7 +342,7 @@ export function getOverviewSectionState(
 ): OverviewSectionLayout {
   const section = prefs.sections.find((entry) => entry.id === id);
   if (!section) {
-    return normalizeSection({ id, visible: true });
+    return normalizeSection({ id, visible: false });
   }
   return normalizeSection(section);
 }
