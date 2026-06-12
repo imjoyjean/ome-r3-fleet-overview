@@ -13,6 +13,12 @@ After GitHub Pages deploys from `main`:
 
 **https://imjoyjean.github.io/ome-r3-fleet-overview/**
 
+If the URL 404s, check these on the repo (**Settings → Pages**):
+
+1. **Repository visibility** must be **Public** (GitHub Free does not publish Pages from private repos).
+2. **Build and deployment → Source** must be **GitHub Actions** (not “Deploy from a branch”).
+3. Open **Actions**, run **Deploy to GitHub Pages**, and confirm the deploy job succeeds.
+
 Key routes:
 
 | Route | Description |
