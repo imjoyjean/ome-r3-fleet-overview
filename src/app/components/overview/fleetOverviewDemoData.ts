@@ -1,0 +1,340 @@
+import {
+  FLEET_ROLLOUT_DEMO_ACTIVITIES,
+  getFleetRolloutDetail,
+  type FleetRolloutActivity,
+} from "../deployments/fleetRolloutDemoData";
+
+export type AttentionSeverity = "critical" | "warning" | "info";
+
+export type AttentionItem = {
+  id: string;
+  severity: AttentionSeverity;
+  title: string;
+  description: string;
+  href: string;
+  hrefLabel: string;
+};
+
+export type FleetHealthSignal = {
+  id: string;
+  label: string;
+  summary: string;
+  status: "healthy" | "warning" | "critical" | "neutral";
+  href: string;
+  detail?: string;
+};
+
+export type DetectedRecommendation = {
+  id: string;
+  title: string;
+  description: string;
+  scope: string;
+  href: string;
+  hrefLabel: string;
+  kind: "upgrade" | "drift" | "cert" | "compliance";
+};
+
+export type OverviewWidget = {
+  id: string;
+  title: string;
+  metric: string;
+  detail: string;
+  href: string;
+  trend?: string;
+  /** Where the pin was created, e.g. a saved cluster search */
+  sourceLabel?: string;
+};
+
+export const overviewCopy = {
+  pageTitle: "Overview",
+  lastUpdated: "Updated 2 minutes ago",
+  attentionTitle: "Attention required",
+  fleetRollouts: "Fleet rollouts",
+  rolloutsInProgress: "In progress",
+  lastCompletedRollout: "Last completed rollout",
+  activeRollouts: "Active rollouts",
+  fleetHealth: "Platform health",
+  recommendations: "Recommendations",
+  yourView: "Your view",
+  yourViewDescription:
+    "Personalize this view by pinning saved searches and shortcuts from other pages.",
+  viewAllRollouts: "View all rollouts",
+  viewAllRolloutsCount: (n: number) => `View all rollouts (${n})`,
+  rolloutsShowing: (shown: number, total: number) => `Showing ${shown} of ${total}`,
+  showAll: (n: number) => `Show all (${n})`,
+  showLess: "Show less",
+};
+
+export function summarizeRolloutProgress(activity: FleetRolloutActivity): string {
+  if (activity.progressType === "simple" && activity.simpleProgress) {
+    const { current, total, unit } = activity.simpleProgress;
+    return `${current}/${total} ${unit}`;
+  }
+  if (activity.canaryProgress) {
+    const cp = activity.canaryProgress;
+    if (cp.p1.status === "active") {
+      return `Canary ${cp.p1.current}/${cp.p1.total}`;
+    }
+    if (cp.p1.status === "failed") {
+      return `Canary failed ${cp.p1.failedCount ?? 0}/${cp.p1.total}`;
+    }
+    if (cp.p2.status === "active") {
+      return `Wave 2 ${cp.p2.current}/${cp.p2.total}`;
+    }
+    if (activity.status === "waiting") {
+      return "Scheduled";
+    }
+    return `Canary ${cp.p1.current}/${cp.p1.total}`;
+  }
+  return activity.note ?? "—";
+}
+
+export function rolloutStatusLabel(activity: FleetRolloutActivity): string {
+  switch (activity.status) {
+    case "running":
+      return "In progress";
+    case "stopped":
+      return "Failed";
+    case "waiting":
+      return "Scheduled";
+    case "soaking":
+      return "Soaking";
+    case "completed":
+      return "Complete";
+    case "active":
+      return "Active";
+    default:
+      return activity.status;
+  }
+}
+
+export function rolloutStatusVariant(
+  activity: FleetRolloutActivity,
+): "success" | "warning" | "destructive" | "info" | "default" {
+  if (activity.status === "stopped") return "destructive";
+  if (activity.status === "waiting") return "default";
+  if (activity.status === "running" || activity.status === "active") return "info";
+  if (activity.status === "completed") return "success";
+  return "warning";
+}
+
+export function getActiveFleetChanges(): FleetRolloutActivity[] {
+  return FLEET_ROLLOUT_DEMO_ACTIVITIES.filter(
+    (a) => !a.archived && a.status !== "completed",
+  ).sort((a, b) => b.updatedAtMs - a.updatedAtMs);
+}
+
+export const ACTIVE_ROLLOUT_PREVIEW_COUNT = 5;
+
+function rolloutOverviewPriority(status: FleetRolloutActivity["status"]): number {
+  switch (status) {
+    case "stopped":
+      return 0;
+    case "running":
+    case "active":
+    case "soaking":
+      return 1;
+    case "waiting":
+      return 2;
+    default:
+      return 3;
+  }
+}
+
+/** Overview table — failed first, then active, then scheduled; capped with link to full list. */
+export function getOverviewActiveRollouts(limit = ACTIVE_ROLLOUT_PREVIEW_COUNT) {
+  const all = getActiveFleetChanges().sort((a, b) => {
+    const priorityDiff =
+      rolloutOverviewPriority(a.status) - rolloutOverviewPriority(b.status);
+    if (priorityDiff !== 0) return priorityDiff;
+    return b.updatedAtMs - a.updatedAtMs;
+  });
+  const preview = all.slice(0, limit);
+  return {
+    all,
+    preview,
+    hiddenCount: Math.max(0, all.length - preview.length),
+  };
+}
+
+/** Morning KPI strip — Journey 3: alerts, capacity, compliance via fleet health */
+export type FleetSummaryStat = {
+  id: string;
+  label: string;
+  value: string;
+  status: string;
+  href: string;
+  trend?: string;
+};
+
+export const FLEET_SUMMARY_STATS: FleetSummaryStat[] = [
+  {
+    id: "clusters",
+    label: "Clusters",
+    value: "40",
+    status: "2 degraded",
+    href: "/clusters",
+  },
+  {
+    id: "rollouts",
+    label: "Active rollouts",
+    value: "10",
+    status: "1 failed",
+    href: "/fleetrollout",
+  },
+  {
+    id: "capacity",
+    label: "Capacity (CPU avg)",
+    value: "72%",
+    status: "8 clusters above 85%",
+    trend: "+4% vs last week",
+    href: "/observability",
+  },
+  {
+    id: "alerts",
+    label: "Critical alerts",
+    value: "3",
+    status: "12 warnings · 2 new today",
+    href: "/observability",
+  },
+  {
+    id: "versions",
+    label: "Version target",
+    value: "5 behind",
+    status: "Target OCP 4.16.2",
+    href: "/fleetrollout",
+  },
+];
+
+export const ATTENTION_ITEMS: AttentionItem[] = [
+  {
+    id: "att-rollout-failed",
+    severity: "critical",
+    title: "Cluster update stopped",
+    description: "6 canary failures on OCP 4.16 → 4.17 · Wave 2 cancelled",
+    href: "/fleetrollout/fleet-upgrade-001",
+    hrefLabel: "Review",
+  },
+  {
+    id: "att-action-required",
+    severity: "warning",
+    title: "Approval required",
+    description: "OCP 4.17 → 4.18 on env=prod waiting before maintenance window",
+    href: "/settings",
+    hrefLabel: "Approve",
+  },
+  {
+    id: "att-cert",
+    severity: "info",
+    title: "Certificate expiring",
+    description: "prod-ap-01 ingress expires in 28 days",
+    href: "/clusters/prod-ap-01",
+    hrefLabel: "View",
+  },
+  {
+    id: "att-policy",
+    severity: "info",
+    title: "Policy violations",
+    description: "5 open · 2 in production namespaces",
+    href: "/policies",
+    hrefLabel: "Review",
+  },
+];
+
+/** Secondary signals — not duplicated in the KPI summary strip */
+export const FLEET_HEALTH_SIGNALS: FleetHealthSignal[] = [
+  {
+    id: "gitops",
+    label: "GitOps",
+    summary: "38/40 synced",
+    status: "warning",
+    href: "/fleetrollout/argocd-app-rollout-005",
+    detail: "2 applications out of sync",
+  },
+  {
+    id: "operators",
+    label: "Operators",
+    summary: "37/40 available",
+    status: "warning",
+    href: "/clusters",
+    detail: "Cluster Version, Ingress",
+  },
+  {
+    id: "policy",
+    label: "Compliance",
+    summary: "35/40 compliant",
+    status: "warning",
+    href: "/policies",
+    detail: "5 violations",
+  },
+  {
+    id: "certs",
+    label: "Certificates",
+    summary: "39/40 valid",
+    status: "healthy",
+    href: "/clusters",
+    detail: "1 expiring soon",
+  },
+];
+
+export const DETECTED_RECOMMENDATIONS: DetectedRecommendation[] = [
+  {
+    id: "rec-zstream",
+    title: "OpenShift 4.16.2 available",
+    description: "Patch release CVE-2026-1188 · 40 clusters in prod-cluster-set",
+    scope: "40 clusters",
+    href: "/fleetrollout",
+    hrefLabel: "Plan rollout",
+    kind: "upgrade",
+  },
+  {
+    id: "rec-drift",
+    title: "MachineConfig drift",
+    description: "3 clusters differ from fleet-gitops baseline worker-v2",
+    scope: "3 clusters",
+    href: "/fleetrollout/git-mc-rollout-007",
+    hrefLabel: "View status",
+    kind: "drift",
+  },
+  {
+    id: "rec-cert",
+    title: "Certificate expiring",
+    description: "prod-ap-01 ingress · Apr 28, 2026",
+    scope: "1 cluster",
+    href: "/clusters/prod-ap-01",
+    hrefLabel: "View cluster",
+    kind: "cert",
+  },
+];
+
+/** User-pinned cards — typically saved searches promoted from list pages */
+export const PINNED_WIDGETS: OverviewWidget[] = [
+  {
+    id: "security-prod-cves",
+    title: "Prod critical CVEs",
+    sourceLabel: "Saved search · Security",
+    metric: "2 critical CVEs",
+    detail: "Images in prod across 3 clusters",
+    href: "/security",
+    trend: "−1 since yesterday",
+  },
+  {
+    id: "vms-migration-queue",
+    title: "VM migration queue",
+    sourceLabel: "Saved search · Virtual machines",
+    metric: "412 running",
+    detail: "6 migration jobs in progress",
+    href: "/virtual-machines",
+  },
+];
+
+export const DEFAULT_YOUR_VIEW_CARD_IDS = PINNED_WIDGETS.map((widget) => widget.id);
+
+export function getMorningAfterSummary() {
+  const detail = getFleetRolloutDetail("fleet-patch-004");
+  return detail?.completedSummary ?? null;
+}
+
+export function getMorningAfterDetail() {
+  return getFleetRolloutDetail("fleet-patch-004");
+}
