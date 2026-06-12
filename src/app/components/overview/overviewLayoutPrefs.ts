@@ -38,20 +38,20 @@ export const OVERVIEW_SECTION_META: Record<
     description: "Onboarding checklist for new console users",
   },
   "fleet-summary": {
-    label: "Fleet summary",
-    description: "KPI strip and platform health",
+    label: "Fleet at a glance",
+    description: "Headline KPIs and platform health summary",
   },
   attention: {
-    label: "Attention required",
-    description: "Exceptions that need action",
+    label: "Needs your action",
+    description: "Exceptions that need a decision or investigation now",
   },
   "fleet-rollouts": {
     label: "Fleet rollouts",
-    description: "Last completed rollout and in-progress table",
+    description: "Last completed rollout and in-progress changes",
   },
   recommendations: {
-    label: "Recommendations",
-    description: "Detected upgrades and drift",
+    label: "Suggested next steps",
+    description: "Detected upgrades and configuration drift",
   },
   "pinned-insights": {
     label: "Your view",
@@ -103,7 +103,7 @@ export const DEFAULT_OVERVIEW_LAYOUT: OverviewLayoutPrefs = {
   ],
 };
 
-const STORAGE_KEY = "ome-overview-layout-v2";
+const STORAGE_KEY = "ome-overview-layout-v3";
 
 function normalizeSection(entry: OverviewSectionLayout): OverviewSectionLayout {
   return {
@@ -186,6 +186,7 @@ export function loadOverviewLayout(): OverviewLayoutPrefs {
   try {
     const raw =
       window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem("ome-overview-layout-v2") ??
       window.localStorage.getItem("ome-overview-layout-v1");
     if (!raw) return DEFAULT_OVERVIEW_LAYOUT;
     return mergeWithDefaults(JSON.parse(raw));
@@ -202,6 +203,7 @@ export function saveOverviewLayout(prefs: OverviewLayoutPrefs): void {
 export function resetOverviewLayout(): OverviewLayoutPrefs {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem("ome-overview-layout-v2");
     window.localStorage.removeItem("ome-overview-layout-v1");
   }
   return DEFAULT_OVERVIEW_LAYOUT;

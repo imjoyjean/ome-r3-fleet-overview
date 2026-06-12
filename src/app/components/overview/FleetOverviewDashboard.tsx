@@ -65,8 +65,6 @@ import {
   type OverviewSectionId,
 } from "./overviewLayoutPrefs";
 
-const ATTENTION_PREVIEW_COUNT = 3;
-
 function severityDot(severity: AttentionSeverity) {
   switch (severity) {
     case "critical":
@@ -115,7 +113,7 @@ function SecondarySignalTile({ signal }: { signal: FleetHealthSignal }) {
 }
 
 function FleetSummaryPanel() {
-  const [secondaryOpen, setSecondaryOpen] = useState(true);
+  const [secondaryOpen, setSecondaryOpen] = useState(false);
 
   return (
     <>
@@ -169,7 +167,7 @@ function FleetSummaryPanel() {
           />
         </CollapsibleTrigger>
         <CollapsibleContent className="px-4 pb-4">
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {FLEET_HEALTH_SIGNALS.map((signal) => (
               <SecondarySignalTile key={signal.id} signal={signal} />
             ))}
@@ -247,6 +245,10 @@ function LastCompletedRolloutSection() {
             <TinyText muted>{overviewCopy.lastCompletedRollout}</TinyText>
             {completedAt ? (
               <>
+                <TinyText muted aria-hidden>
+                  ·
+                </TinyText>
+                <TinyText muted>{overviewCopy.morningAfterHint}</TinyText>
                 <TinyText muted aria-hidden>
                   ·
                 </TinyText>
@@ -354,7 +356,6 @@ export function FleetOverviewDashboard() {
   const [dropTargetId, setDropTargetId] = useState<OverviewSectionId | "end" | null>(
     null,
   );
-  const [attentionExpanded, setAttentionExpanded] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(
     gettingStarted.completed < gettingStarted.total,
   );
@@ -363,10 +364,6 @@ export function FleetOverviewDashboard() {
     all: allActiveRollouts,
     hiddenCount: hiddenRolloutCount,
   } = getOverviewActiveRollouts();
-  const visibleAttention = attentionExpanded
-    ? ATTENTION_ITEMS
-    : ATTENTION_ITEMS.slice(0, ATTENTION_PREVIEW_COUNT);
-  const hiddenAttentionCount = ATTENTION_ITEMS.length - ATTENTION_PREVIEW_COUNT;
 
   useEffect(() => {
     saveOverviewLayout(layout);
@@ -492,23 +489,9 @@ export function FleetOverviewDashboard() {
       case "attention":
         return (
           <>
-            {visibleAttention.map((item) => (
+            {ATTENTION_ITEMS.map((item) => (
               <CompactAttentionRow key={item.id} item={item} />
             ))}
-            {hiddenAttentionCount > 0 ? (
-              <div className="px-4 py-2">
-                <button
-                  type="button"
-                  className="text-sm font-medium hover:underline"
-                  style={{ color: "var(--primary)" }}
-                  onClick={() => setAttentionExpanded((open) => !open)}
-                >
-                  {attentionExpanded
-                    ? overviewCopy.showLess
-                    : overviewCopy.showAll(ATTENTION_ITEMS.length)}
-                </button>
-              </div>
-            ) : null}
           </>
         );
       case "fleet-rollouts":
@@ -570,22 +553,15 @@ export function FleetOverviewDashboard() {
             </DenseTable>
             {hiddenRolloutCount > 0 ? (
               <div
-                className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                className="px-4 py-3"
                 style={{ borderTop: "1px solid var(--border)" }}
               >
-                <TinyText muted>
+                <TinyText muted className="!block">
                   {overviewCopy.rolloutsShowing(
                     visibleRollouts.length,
                     allActiveRollouts.length,
                   )}
                 </TinyText>
-                <Link
-                  to={deploymentCopy.fleetRollout.basePath}
-                  className="text-sm font-medium hover:underline"
-                  style={{ color: "var(--primary)" }}
-                >
-                  {overviewCopy.viewAllRolloutsCount(allActiveRollouts.length)}
-                </Link>
               </div>
             ) : null}
           </>
@@ -648,6 +624,9 @@ export function FleetOverviewDashboard() {
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <PageTitle className="!mb-0">{overviewCopy.pageTitle}</PageTitle>
+          <TinyText muted className="!mt-1 !block max-w-2xl leading-relaxed">
+            {overviewCopy.pageSubtitle}
+          </TinyText>
           <TinyText muted className="!mt-1 !block">
             {overviewCopy.lastUpdated}
           </TinyText>

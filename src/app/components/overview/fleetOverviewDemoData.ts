@@ -47,14 +47,17 @@ export type OverviewWidget = {
 
 export const overviewCopy = {
   pageTitle: "Overview",
+  pageSubtitle:
+    "Fleet health, active rollouts, and exceptions · details live in Observability and Fleet rollout",
   lastUpdated: "Updated 2 minutes ago",
-  attentionTitle: "Attention required",
+  attentionTitle: "Needs your action",
   fleetRollouts: "Fleet rollouts",
   rolloutsInProgress: "In progress",
   lastCompletedRollout: "Last completed rollout",
+  morningAfterHint: "Morning-after confidence check",
   activeRollouts: "Active rollouts",
   fleetHealth: "Platform health",
-  recommendations: "Recommendations",
+  recommendations: "Suggested next steps",
   yourView: "Your view",
   yourViewDescription:
     "Personalize this view by pinning saved searches and shortcuts from other pages.",
@@ -180,8 +183,8 @@ export const FLEET_HEALTH_BY_GROUP: FleetHealthGroup[] = [
     id: "dev",
     name: "Development",
     clusterCount: 10,
-    summary: "3 clusters behind target version",
-    healthLabel: "Upgrade pending",
+    summary: "GitOps sync lag on 1 application",
+    healthLabel: "Monitor",
     status: "warning",
     href: "/clusters",
   },
@@ -191,17 +194,17 @@ export const ACTIVE_INCIDENTS: ActiveIncident[] = [
   {
     id: "INC-1042",
     title: "Elevated API latency on prod-eu-02",
-    badge: "Warning",
+    badge: "Critical",
     severity: "warning",
     tags: ["prod-eu-02", "apiserver"],
     href: "/observability",
   },
   {
-    id: "INC-1038",
-    title: "Ingress certificate renewal pending",
-    badge: "Info",
-    severity: "info",
-    tags: ["prod-ap-01"],
+    id: "INC-1039",
+    title: "etcd leader election flapping on staging-us-01",
+    badge: "Warning",
+    severity: "warning",
+    tags: ["staging-us-01", "etcd"],
     href: "/observability",
   },
 ];
@@ -371,14 +374,6 @@ export const FLEET_SUMMARY_STATS: FleetSummaryStat[] = [
 
 export const ATTENTION_ITEMS: AttentionItem[] = [
   {
-    id: "att-rollout-failed",
-    severity: "critical",
-    title: "Cluster update stopped",
-    description: "6 canary failures on OCP 4.16 → 4.17 · Wave 2 cancelled",
-    href: "/fleetrollout/fleet-upgrade-001",
-    hrefLabel: "Review",
-  },
-  {
     id: "att-action-required",
     severity: "warning",
     title: "Approval required",
@@ -387,28 +382,28 @@ export const ATTENTION_ITEMS: AttentionItem[] = [
     hrefLabel: "Approve",
   },
   {
-    id: "att-cert",
-    severity: "info",
-    title: "Certificate expiring",
-    description: "prod-ap-01 ingress expires in 28 days",
-    href: "/clusters/prod-ap-01",
-    hrefLabel: "View",
+    id: "att-alert",
+    severity: "critical",
+    title: "Critical alert · API latency",
+    description: "prod-eu-02 apiserver · 3 critical alerts fleet-wide",
+    href: "/observability",
+    hrefLabel: "Investigate",
   },
   {
-    id: "att-policy",
-    severity: "info",
-    title: "Policy violations",
-    description: "5 open · 2 in production namespaces",
-    href: "/policies",
-    hrefLabel: "Review",
+    id: "att-operators",
+    severity: "warning",
+    title: "Operator unavailable",
+    description: "Cluster Version or Ingress degraded on 3 clusters",
+    href: "/clusters",
+    hrefLabel: "View clusters",
   },
 ];
 
-/** Secondary signals — not duplicated in the KPI summary strip */
+/** Secondary signals — aggregate health not repeated in Attention or Recommendations */
 export const FLEET_HEALTH_SIGNALS: FleetHealthSignal[] = [
   {
     id: "gitops",
-    label: "GitOps",
+    label: "GitOps sync",
     summary: "38/40 synced",
     status: "warning",
     href: "/fleetrollout/argocd-app-rollout-005",
@@ -428,15 +423,7 @@ export const FLEET_HEALTH_SIGNALS: FleetHealthSignal[] = [
     summary: "35/40 compliant",
     status: "warning",
     href: "/policies",
-    detail: "5 violations",
-  },
-  {
-    id: "certs",
-    label: "Certificates",
-    summary: "39/40 valid",
-    status: "healthy",
-    href: "/clusters",
-    detail: "1 expiring soon",
+    detail: "5 open violations",
   },
 ];
 
@@ -458,15 +445,6 @@ export const DETECTED_RECOMMENDATIONS: DetectedRecommendation[] = [
     href: "/fleetrollout/git-mc-rollout-007",
     hrefLabel: "View status",
     kind: "drift",
-  },
-  {
-    id: "rec-cert",
-    title: "Certificate expiring",
-    description: "prod-ap-01 ingress · Apr 28, 2026",
-    scope: "1 cluster",
-    href: "/clusters/prod-ap-01",
-    hrefLabel: "View cluster",
-    kind: "cert",
   },
 ];
 
