@@ -85,15 +85,15 @@ export const OVERVIEW_SECTION_META: Record<
 
 const SECTION_IDS = Object.keys(OVERVIEW_SECTION_META) as OverviewSectionId[];
 
-/** Default landing: fleet KPIs, action queue, rollouts, recommendations, and Your view pins. R1 optional widgets stay in Add widgets. */
+/** Default landing: onboarding, fleet KPIs, action queue, rollouts, recommendations, and Your view. R1 optional widgets stay in Add widgets. */
 export const DEFAULT_OVERVIEW_LAYOUT: OverviewLayoutPrefs = {
   sections: [
+    { id: "getting-started", visible: true },
     { id: "fleet-summary", visible: true },
     { id: "attention", visible: true },
     { id: "fleet-rollouts", visible: true },
     { id: "recommendations", visible: true },
     { id: "pinned-insights", visible: true },
-    { id: "getting-started", visible: false },
     { id: "capacity-chart", visible: false },
     { id: "version-distribution", visible: false },
     { id: "health-by-group", visible: false },
@@ -103,7 +103,7 @@ export const DEFAULT_OVERVIEW_LAYOUT: OverviewLayoutPrefs = {
   ],
 };
 
-const STORAGE_KEY = "ome-overview-layout-v4";
+const STORAGE_KEY = "ome-overview-layout-v5";
 
 function normalizeSection(entry: OverviewSectionLayout): OverviewSectionLayout {
   return {
@@ -186,6 +186,7 @@ export function loadOverviewLayout(): OverviewLayoutPrefs {
   try {
     const raw =
       window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem("ome-overview-layout-v4") ??
       window.localStorage.getItem("ome-overview-layout-v3") ??
       window.localStorage.getItem("ome-overview-layout-v2") ??
       window.localStorage.getItem("ome-overview-layout-v1");
@@ -204,6 +205,7 @@ export function saveOverviewLayout(prefs: OverviewLayoutPrefs): void {
 export function resetOverviewLayout(): OverviewLayoutPrefs {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem("ome-overview-layout-v4");
     window.localStorage.removeItem("ome-overview-layout-v3");
     window.localStorage.removeItem("ome-overview-layout-v2");
     window.localStorage.removeItem("ome-overview-layout-v1");
